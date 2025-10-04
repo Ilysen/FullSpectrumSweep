@@ -1,4 +1,5 @@
 fieldID,fieldName,fieldType,defaultValue,secondaryValue,fieldDescription,minValue,maxValue,tab
-VolatilesCost,Volatiles cost,Int,2,,"Each use of the ability will cost this many volatiles. If set to 0, activation will be free.\nHas no effect when passive mode is enabled.",0,10,
-EnableReminderPings,Enable reminder summaries,Boolean,true,,Re-show each scanned system's undiscovered object count whenever you enter it. This stops appearing whenever all objects have been found.,,,
-PassiveMode,Passive mode,Boolean,false,,The ability does not need to be activated; each system starts out scanned. Functions a lot like the old Objects Analysis mod.,,,
+VolatilesCost,Volatiles cost,Int,2,,"Each use of the full-spectrum sweep will cost this many volatiles. If set to 0, activation is free.
+This setting has no effect if passive mode is enabled.",0,10,
+EnableReminderPings,Enable reminder summaries,Boolean,true,,"Whenever entering a system that has been scanned but still has undiscovered objects, show the remaining quantity as a sidebar message.",,,
+PassiveMode,Passive mode,Boolean,false,,"All systems are scanned by default, removing the need to activate the ability. Results are shown even when entering new areas for the first time.",,,
