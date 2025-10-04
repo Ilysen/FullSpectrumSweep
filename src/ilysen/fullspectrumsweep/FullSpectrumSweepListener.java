@@ -27,7 +27,7 @@ public class FullSpectrumSweepListener implements CurrentLocationChangedListener
 		if (ability.hasScannedCurSystem && !ability.systemComplete) {
 			boolean showReminder = true;
 			if (Global.getSettings().getModManager().isModEnabled("lunalib"))
-				showReminder = LunaSettings.getBoolean("ilysen-fullspectrumsweep", "EnableReminderPings");
+				showReminder = LunaSettings.getBoolean("ilysen_FullSpectrumSweep", "EnableReminderPings");
 			if (showReminder)
 				ability.GenerateMessage(curr);
 		}

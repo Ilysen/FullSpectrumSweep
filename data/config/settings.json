@@ -1,6 +1,6 @@
 {
 	"graphics": {
-			"abilities": {
+			"ilysen_FullSpectrumSweep": {
 					"fss_ready": "graphics/ilysen/fullspectrumsweep/icons/fss_ready.png",
 					"fss_remaining": "graphics/ilysen/fullspectrumsweep/icons/fss_remaining.png",
 					"fss_complete": "graphics/ilysen/fullspectrumsweep/icons/fss_complete.png",

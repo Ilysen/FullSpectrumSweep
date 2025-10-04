@@ -1,21 +1,10 @@
 {
-	"id": "ilysen-fullspectrumsweep",
+	"id": "ilysen_FullSpectrumSweep",
 	"name": "Full-Spectrum Sweep",
-	"author": "Ilysen",
+	"author": "Ceres et al.",
 	"version": "0.1",
-	"description": "TODO",
+	"description": "Adds an activated ability that detects the number of undiscovered objects in a star system, but not their exact locations.",
 	"gameVersion": "0.98a-RC8",
-	"dependencies": 
-	[
-		{
-			"id": "lw_lazylib",
-			"name": "LazyLib"
-		},
-		{
-			"id": "lunalib",
-			"name": "LunaLib"
-		}
-	],
 	"jars": [
 		"full-spectrum-sweep.jar"
 	],

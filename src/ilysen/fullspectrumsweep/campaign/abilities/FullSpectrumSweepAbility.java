@@ -49,9 +49,9 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 		CampaignFleetAPI fleet = getFleet();
 		if (fleet != null) {
 			if (Misc.isInAbyss(fleet))
-				return Global.getSettings().getSpriteName("abilities", "fss_blank");
+				return Global.getSettings().getSpriteName("ilysen_FullSpectrumSweep", "fss_blank");
 			if (hasScannedCurSystem) {
-				return Global.getSettings().getSpriteName("abilities", systemComplete ? "fss_complete" : "fss_remaining");
+				return Global.getSettings().getSpriteName("ilysen_FullSpectrumSweep", systemComplete ? "fss_complete" : "fss_remaining");
 			}
 		}
 		return super.getSpriteName();
@@ -297,7 +297,7 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 				break;
 			}
 		}
-		hasScannedCurSystem = loc.getMemoryWithoutUpdate().contains(FLAG_NAME) || (Global.getSettings().getModManager().isModEnabled("lunalib") && LunaSettings.getBoolean("ilysen-fullspectrumsweep", "PassiveMode"));
+		hasScannedCurSystem = loc.getMemoryWithoutUpdate().contains(FLAG_NAME) || (Global.getSettings().getModManager().isModEnabled("lunalib") && LunaSettings.getBoolean("ilysen_FullSpectrumSweep", "PassiveMode"));
 		//log.info("Has scanned system:" + (hasScannedCurSystem ? "true" : "false"));
 		//log.info("System complete:" + (systemComplete ? "true" : "false"));
 		//log.info("Rescan complete.");
@@ -321,7 +321,7 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 
 	private int GetCommodityCost() {
 		if (Global.getSettings().getModManager().isModEnabled("lunalib"))
-			return LunaSettings.getInt("ilysen-fullspectrumsweep", "VolatilesCost");
+			return LunaSettings.getInt("ilysen_FullSpectrumSweep", "VolatilesCost");
 		return COMMODITY_PER_USE;
 	}
 }
