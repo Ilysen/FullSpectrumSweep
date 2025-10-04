@@ -5,7 +5,19 @@
 	"version": "0.1",
 	"description": "TODO",
 	"gameVersion": "0.98a-RC8",
+	"dependencies": 
+	[
+		{
+			"id": "lw_lazylib",
+			"name": "LazyLib"
+		},
+		{
+			"id": "lunalib",
+			"name": "LunaLib"
+		}
+	],
 	"jars": [
 		"full-spectrum-sweep.jar"
-	]
+	],
+	"modPlugin": "ilysen.fullspectrumsweep.FullSpectrumSweepModPlugin"
 }

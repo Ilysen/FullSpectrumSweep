@@ -1,0 +1,49 @@
+package ilysen.fullspectrumsweep;
+
+import org.apache.log4j.Logger;
+
+import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.LocationAPI;
+import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.campaign.listeners.CurrentLocationChangedListener;
+import com.fs.starfarer.api.campaign.listeners.DiscoverEntityListener;
+
+import ilysen.fullspectrumsweep.campaign.abilities.FullSpectrumSweepAbility;
+import lunalib.lunaSettings.LunaSettings;
+
+// Transient listener responsible for triggering a system rescan whenever the player changes locations or discovers a new entity.
+public class FullSpectrumSweepListener implements CurrentLocationChangedListener, DiscoverEntityListener {
+	private static final Logger log = Global.getLogger(FullSpectrumSweepListener.class);
+
+	public FullSpectrumSweepListener() {
+		log.info("Listener initialized");
+	}
+
+	@Override
+	public void reportCurrentLocationChanged(LocationAPI prev, LocationAPI curr) {
+		log.info("Location changed: Moved from " + prev.getNameWithLowercaseType() + " to " + curr.getNameWithLowercaseType());
+		FullSpectrumSweepAbility ability = GetAbility();
+		ability.RescanSystem(curr);
+		if (ability.hasScannedCurSystem && !ability.systemComplete) {
+			boolean showReminder = true;
+			if (Global.getSettings().getModManager().isModEnabled("lunalib"))
+				showReminder = LunaSettings.getBoolean("ilysen-fullspectrumsweep", "EnableReminderPings");
+			if (showReminder)
+				ability.GenerateMessage(curr);
+		}
+	}
+
+	@Override
+	public void reportEntityDiscovered(SectorEntityToken entity) {
+		log.info("Entity discovered: " + entity.getFullName());
+		LocationAPI entityLoc = entity.getContainingLocation();
+		if (!entity.isInHyperspace() && Global.getSector().getPlayerFleet().getContainingLocation() == entityLoc) {
+			FullSpectrumSweepAbility ability = GetAbility();
+			ability.RescanSystem(entityLoc);
+		}
+	}
+
+	private FullSpectrumSweepAbility GetAbility() {
+		return (FullSpectrumSweepAbility) Global.getSector().getPlayerFleet().getAbility("ilysen_fss_fullspectrumsweep");
+	}
+}
