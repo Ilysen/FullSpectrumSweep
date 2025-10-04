@@ -1,10 +1,10 @@
 {
 	"graphics": {
 			"abilities": {
-					"fss_ready": "graphics/fss/icons/fss_ready.png",
-					"fss_remaining": "graphics/fss/icons/fss_remaining.png",
-					"fss_complete": "graphics/fss/icons/fss_complete.png",
-					"fss_blank": "graphics/fss/icons/fss_blank.png"
+					"fss_ready": "graphics/ilysen/fullspectrumsweep/icons/fss_ready.png",
+					"fss_remaining": "graphics/ilysen/fullspectrumsweep/icons/fss_remaining.png",
+					"fss_complete": "graphics/ilysen/fullspectrumsweep/icons/fss_complete.png",
+					"fss_blank": "graphics/ilysen/fullspectrumsweep/icons/fss_blank.png"
 			}
 	}
 }
