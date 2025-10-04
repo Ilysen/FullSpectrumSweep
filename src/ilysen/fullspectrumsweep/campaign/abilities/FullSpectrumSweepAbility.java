@@ -27,7 +27,7 @@ import org.apache.log4j.Logger;
 
 public class FullSpectrumSweepAbility extends BaseDurationAbility {
 	public static final String FRONT_END_TEXT = "Full-spectrum sweep";
-	public static final String FLAG_NAME = "$ilysen_fullSpectrumSweep_didFssInSystem";
+	public static final String FLAG_NAME = "$ilysen_FullSpectrumSweep_UsedFssInSystem";
 	public static final float DETECTABILITY_RANGE_BONUS = 5000f;
 	public static final String COMMODITY_ID = "volatiles";
 	public static final int COMMODITY_PER_USE = 1;

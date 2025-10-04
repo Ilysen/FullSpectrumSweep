@@ -44,6 +44,6 @@ public class FullSpectrumSweepListener implements CurrentLocationChangedListener
 	}
 
 	private FullSpectrumSweepAbility GetAbility() {
-		return (FullSpectrumSweepAbility) Global.getSector().getPlayerFleet().getAbility("ilysen_fss_fullspectrumsweep");
+		return (FullSpectrumSweepAbility) Global.getSector().getPlayerFleet().getAbility("ilysen_FullSpectrumSweep_FSSAbility");
 	}
 }
