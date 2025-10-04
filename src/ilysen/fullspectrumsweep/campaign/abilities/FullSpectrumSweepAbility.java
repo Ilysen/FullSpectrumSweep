@@ -76,7 +76,7 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 
 	@Override
 	protected void activateImpl() {
-		log.info("Activating");
+		//log.info("Activating");
 		if (entity.isInCurrentLocation()) {
 			if (entity.getVisibilityLevelToPlayerFleet() != VisibilityLevel.NONE) {
 				CampaignPingSpec custom = new CampaignPingSpec();
@@ -91,7 +91,7 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 			}
 			isPerformingScan = true;
 			int commodityCost = GetCommodityCost();
-			log.info("Volatiles to consume: " + commodityCost);
+			//log.info("Volatiles to consume: " + commodityCost);
 			if (commodityCost > 0)
 				entity.getCargo().removeCommodity(COMMODITY_ID, commodityCost);
 		}
@@ -120,7 +120,7 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 
 	@Override
 	protected void cleanupImpl() {
-		log.info("Cleaning up");
+		//log.info("Cleaning up");
 		CampaignFleetAPI fleet = getFleet();
 		if (fleet != null) {
 			fleet.getStats().getDetectedRangeMod().unmodify(getModId());
@@ -279,10 +279,10 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 	// Theoretically this could just be determined every frame, but it's way cleaner to only rerun it when necessary.
 	public void RescanSystem(LocationAPI loc)
 	{
-		log.info("Rescanning: " + loc.getName());
+		//log.info("Rescanning: " + loc.getName());
 		isInHyperspace = loc.isHyperspace();
 		if (loc.isHyperspace()) {
-			log.info("Entered hyperspace. Ending logic here.");
+			//log.info("Entered hyperspace. Ending logic here.");
 			_cachedEntities = null;
 			systemComplete = false;
 			hasScannedCurSystem = false;
@@ -291,16 +291,16 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 		_cachedEntities = GetAllUndiscoveredEntities(loc);
 		systemComplete = true; // Set this with a default of true...
 		for (Map.Entry<String, List<SectorEntityToken>> entry : _cachedEntities.entrySet()) {
-			log.info(entry.getKey() + " contains " + entry.getValue().size() + " entries");
+			//log.info(entry.getKey() + " contains " + entry.getValue().size() + " entries");
 			if (!entry.getValue().isEmpty() && systemComplete) {
 				systemComplete = false; // ...and set it to false if there are entities that we haven't discovered
 				break;
 			}
 		}
 		hasScannedCurSystem = loc.getMemoryWithoutUpdate().contains(FLAG_NAME) || (Global.getSettings().getModManager().isModEnabled("lunalib") && LunaSettings.getBoolean("ilysen-fullspectrumsweep", "PassiveMode"));
-		log.info("Has scanned system:" + (hasScannedCurSystem ? "true" : "false"));
-		log.info("System complete:" + (systemComplete ? "true" : "false"));
-		log.info("Rescan complete.");
+		//log.info("Has scanned system:" + (hasScannedCurSystem ? "true" : "false"));
+		//log.info("System complete:" + (systemComplete ? "true" : "false"));
+		//log.info("Rescan complete.");
 	}
 
 	public void GenerateMessage(LocationAPI loc)

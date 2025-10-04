@@ -16,12 +16,12 @@ public class FullSpectrumSweepListener implements CurrentLocationChangedListener
 	private static final Logger log = Global.getLogger(FullSpectrumSweepListener.class);
 
 	public FullSpectrumSweepListener() {
-		log.info("Listener initialized");
+		//log.info("Listener initialized");
 	}
 
 	@Override
 	public void reportCurrentLocationChanged(LocationAPI prev, LocationAPI curr) {
-		log.info("Location changed: Moved from " + prev.getNameWithLowercaseType() + " to " + curr.getNameWithLowercaseType());
+		//log.info("Location changed: Moved from " + prev.getNameWithLowercaseType() + " to " + curr.getNameWithLowercaseType());
 		FullSpectrumSweepAbility ability = GetAbility();
 		ability.RescanSystem(curr);
 		if (ability.hasScannedCurSystem && !ability.systemComplete) {
@@ -35,7 +35,7 @@ public class FullSpectrumSweepListener implements CurrentLocationChangedListener
 
 	@Override
 	public void reportEntityDiscovered(SectorEntityToken entity) {
-		log.info("Entity discovered: " + entity.getFullName());
+		//log.info("Entity discovered: " + entity.getFullName());
 		LocationAPI entityLoc = entity.getContainingLocation();
 		if (!entity.isInHyperspace() && Global.getSector().getPlayerFleet().getContainingLocation() == entityLoc) {
 			FullSpectrumSweepAbility ability = GetAbility();

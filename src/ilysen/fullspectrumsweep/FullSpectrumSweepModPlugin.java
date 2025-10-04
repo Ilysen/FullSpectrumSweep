@@ -15,9 +15,9 @@ public class FullSpectrumSweepModPlugin extends BaseModPlugin {
 
 	@Override
 	public void onGameLoad(boolean newGame) {
-		log.info("Loading mod plugin...");
+		//log.info("Loading mod plugin...");
 		Global.getSector().getListenerManager().addListener(new FullSpectrumSweepListener(), true);
-		log.info("Loading complete");
+		//log.info("Loading complete");
 		if (!Global.getSector().getPlayerFleet().hasAbility("ilysen_fss_fullspectrumsweep")) {
 			Global.getSector().getCampaignUI().addMessage("Ability learned: %s", Misc.getTextColor(), FullSpectrumSweepAbility.FRONT_END_TEXT, "", Misc.getHighlightColor(), Color.black);
 			Global.getSector().getCharacterData().addAbility("ilysen_fss_fullspectrumsweep");
