@@ -1,0 +1,11 @@
+{
+	"id": "ilysen_fullspectrumsweep",
+	"name": "Full-Spectrum Sweep",
+	"author": "Ilysen",
+	"version": "0.1",
+	"description": "TODO",
+	"gameVersion": "0.98a-RC8",
+	"jars": [
+		"full-spectrum-sweep.jar"
+	]
+}
