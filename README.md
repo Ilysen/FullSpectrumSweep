@@ -21,12 +21,14 @@ If [LunaLib](https://fractalsoftworks.com/forum/index.php?topic=25658) is instal
 
 ## Screenshots
 
-<details><summary>Click to expand</summary>
+<details><summary>Click to expand (note the changing icon color!)</summary>
 
-*In an unscanned system.*
+*In an unscanned system:*<br/>
 ![The full description of the Full-Spectrum Sweep ability in-game.](docs/fss_desc.png)
-*In a scanned system, with some undiscovered objects remaining.*
+
+*In a scanned system, with some undiscovered objects remaining:*<br/>
 ![The tooltip of the Full-Spectrum Sweep ability in a system that's been scanned, showing a readout of several detected object types and their associated quantities. The ability's icon has turned yellow to represent that there are undiscovered objects.](docs/fss_remaining.png)
-*In a scanned system, with all objects discovered.
+
+*In a scanned system, with all objects discovered:*<br/>
 ![The tooltip of the Full-Spectrum Sweep ability in a system that's been scanned and fully explored. The ability's icon has turned green to represent that everything in the system has been discovered.](docs/fss_complete.png)
 </details>
