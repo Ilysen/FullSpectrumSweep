@@ -12,7 +12,6 @@ import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
-import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken.VisibilityLevel;
 import com.fs.starfarer.api.impl.campaign.abilities.BaseDurationAbility;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
@@ -64,11 +63,7 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 		CampaignFleetAPI fleet = getFleet();
 		if (fleet == null)
 			return;
-		int commodityCost = GetCommodityCost();
-		if (fleet.getCargo().getCommodityQuantity(COMMODITY_ID) < commodityCost && !Global.getSettings().isDevMode()) {
-      CommoditySpecAPI spec = Global.getSettings().getCommoditySpec(COMMODITY_ID);
-      fleet.addFloatingText("Out of " + spec.getName().toLowerCase(), Misc.setAlpha(this.entity.getIndicatorColor(), 255), 0.5F);
-			Global.getSoundPlayer().playUISound("ui_neutrino_detector_off", 1f, 1f);
+		if (!CheckCommodities()) {
 			return;
 		}
 		super.pressButton();
@@ -90,10 +85,7 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 				Global.getSector().addPing(entity, custom);
 			}
 			isPerformingScan = true;
-			int commodityCost = GetCommodityCost();
-			//log.info("Volatiles to consume: " + commodityCost);
-			if (commodityCost > 0)
-				entity.getCargo().removeCommodity(COMMODITY_ID, commodityCost);
+			RemoveCommodities();
 		}
 	}
 
@@ -158,7 +150,7 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 		if (!Global.CODEX_TOOLTIP_MODE) {
 			tooltip.addTitle(spec.getName());
 			if (Misc.isInAbyss(getFleet())) { // Special handling in abyssal hyperspace; glitchy text and blank icon
-				String spooky = "";
+				StringBuilder spooky = new StringBuilder();
 				if (_spookyTextTicks > 0) {
 					_spookyTextTicks--;
 					if (_spookyText.isBlank()) {
@@ -180,9 +172,9 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 					tooltip.addPara("%s", _padding, negative, _spookyText);
 				} else {
 					for (int i = 0; i < Misc.random.nextInt(4, 45); i++) {
-						spooky += "?";
+						spooky.append("?");
 					}
-					tooltip.addPara(spooky, _padding);
+					tooltip.addPara(spooky.toString(), _padding);
 					if (Misc.random.nextInt(200) == 1) {
 							_spookyTextTicks = Misc.random.nextInt(10, 40);
 							_spookyText = "";
@@ -268,7 +260,7 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 		Map<String, List<SectorEntityToken>> entities = new HashMap<>();
 		for (String tag : tagList) {
 			List<SectorEntityToken> matching = loc.getEntitiesWithTag(tag);
-			matching.removeIf(x -> ShouldCullEntry((x)));
+			matching.removeIf(FullSpectrumSweepAbility::ShouldCullEntry);
 			entities.put(tag, matching);
 		}
 		return entities;
@@ -281,6 +273,7 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 	{
 		//log.info("Rescanning: " + loc.getName());
 		isInHyperspace = loc.isHyperspace();
+		systemComplete = true; // Set this with a default of true...
 		if (loc.isHyperspace()) {
 			//log.info("Entered hyperspace. Ending logic here.");
 			_cachedEntities = null;
@@ -289,12 +282,17 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 			return;
 		}
 		_cachedEntities = GetAllUndiscoveredEntities(loc);
-		systemComplete = true; // Set this with a default of true...
 		for (Map.Entry<String, List<SectorEntityToken>> entry : _cachedEntities.entrySet()) {
 			//log.info(entry.getKey() + " contains " + entry.getValue().size() + " entries");
 			if (!entry.getValue().isEmpty() && systemComplete) {
 				systemComplete = false; // ...and set it to false if there are entities that we haven't discovered
 				break;
+			}
+		}
+		if (Global.getSettings().getModManager().isModEnabled("lunalib") && LunaSettings.getBoolean("ilysen_FullSpectrumSweep", "PassiveMode")) {
+			if (CheckCommodities()) {
+				RemoveCommodities();
+				loc.getMemoryWithoutUpdate().set(FLAG_NAME, true);
 			}
 		}
 		hasScannedCurSystem = loc.getMemoryWithoutUpdate().contains(FLAG_NAME) || (Global.getSettings().getModManager().isModEnabled("lunalib") && LunaSettings.getBoolean("ilysen_FullSpectrumSweep", "PassiveMode"));
@@ -323,5 +321,20 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 		if (Global.getSettings().getModManager().isModEnabled("lunalib"))
 			return LunaSettings.getInt("ilysen_FullSpectrumSweep", "VolatilesCost");
 		return COMMODITY_PER_USE;
+	}
+
+	private boolean CheckCommodities() {
+		if (entity.getCargo().getCommodityQuantity(COMMODITY_ID) < GetCommodityCost() && !Global.getSettings().isDevMode()) {
+			entity.addFloatingText("Out of " + spec.getName().toLowerCase(), Misc.setAlpha(this.entity.getIndicatorColor(), 255), 0.5F);
+			Global.getSoundPlayer().playUISound("ui_neutrino_detector_off", 1f, 1f);
+			return false;
+		}
+		return true;
+	}
+
+	private void RemoveCommodities() {
+		if (Global.getSettings().isDevMode())
+			return;
+		entity.getCargo().removeCommodity(COMMODITY_ID, GetCommodityCost());
 	}
 }
