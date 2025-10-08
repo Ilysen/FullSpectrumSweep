@@ -1,5 +1,7 @@
 package ilysen.fullspectrumsweep;
 
+import com.fs.starfarer.api.impl.campaign.intel.MessageIntel;
+import com.fs.starfarer.api.util.Misc;
 import org.apache.log4j.Logger;
 
 import com.fs.starfarer.api.Global;
@@ -39,7 +41,16 @@ public class FullSpectrumSweepListener implements CurrentLocationChangedListener
 		LocationAPI entityLoc = entity.getContainingLocation();
 		if (!entity.isInHyperspace() && Global.getSector().getPlayerFleet().getContainingLocation() == entityLoc) {
 			FullSpectrumSweepAbility ability = GetAbility();
+			boolean systemWasComplete = ability.systemComplete;
 			ability.RescanSystem(entityLoc);
+			if (ability.systemComplete && !systemWasComplete && LunaSettings.getBoolean("ilysen_FullSpectrumSweep", "AlertOnComplete")) {
+				String title = FullSpectrumSweepAbility.FRONT_END_TEXT + ": All signatures discovered";
+
+				MessageIntel intel = new MessageIntel(title, Misc.getBasePlayerColor());
+				intel.setIcon(ability.getSpriteName());
+
+				Global.getSector().getCampaignUI().addMessage(intel);
+			}
 		}
 	}
 

@@ -2,4 +2,5 @@ fieldID,fieldName,fieldType,defaultValue,secondaryValue,fieldDescription,minValu
 VolatilesCost,Volatiles cost,Int,2,,"Each use of the full-spectrum sweep will cost this many volatiles. If set to 0, activation is free.
 This setting has no effect if passive mode is enabled.",0,10,
 EnableReminderPings,Enable reminder summaries,Boolean,true,,"Whenever entering a system that has been scanned but still has undiscovered objects, show the remaining quantity as a sidebar message.",,,
+AlertOnComplete,Show a message once all signatures are discovered,Boolean,false,,Display a message once all scanned signatures in a system have been discovered. This saves you from having to look at the icon or tooltip.,,,
 PassiveMode,Passive mode,Boolean,false,,"All systems are scanned by default, removing the need to activate the ability. Results are shown even when entering new areas for the first time.",,,

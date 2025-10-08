@@ -41,8 +41,6 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 	private int _spookyTextTicks = 0;
 	private String _spookyText;
 
-	public FullSpectrumSweepAbility() { }
-
 	@Override
 	public String getSpriteName() {
 		CampaignFleetAPI fleet = getFleet();
@@ -171,13 +169,11 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 					}
 					tooltip.addPara("%s", _padding, negative, _spookyText);
 				} else {
-					for (int i = 0; i < Misc.random.nextInt(4, 45); i++) {
-						spooky.append("?");
-					}
+					spooky.append("?".repeat(Math.max(0, Misc.random.nextInt(4, 45))));
 					tooltip.addPara(spooky.toString(), _padding);
 					if (Misc.random.nextInt(200) == 1) {
-							_spookyTextTicks = Misc.random.nextInt(10, 40);
-							_spookyText = "";
+						_spookyTextTicks = Misc.random.nextInt(10, 40);
+						_spookyText = "";
 					}
 				}
 				return;
@@ -218,30 +214,36 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 			tooltip.addPara(
 					"Objects that have already been discovered are excluded from the sweep. Additionally, some phenomena - including cargo pods, unstable debris, and any fleets other than your own - cannot be detected at all.",
 					_padding);
-			tooltip.addPara(
-					"This ability only needs to be used one time for any given system. Afterwards, this tooltip will provide an up-to-date summary while within that system.",
-					_padding);
-			tooltip.addPara(
-					"During activation, increases the range at which the fleet can be detected by %s* units and brings the fleet to a near-stop as drives are powered down to reduce interference.",
-					_padding,
-					Misc.getHighlightColor(),
-					Misc.getRoundedValueMaxOneAfterDecimal(DETECTABILITY_RANGE_BONUS));
-			int volatilesConsumption = GetCommodityCost();
-			if (volatilesConsumption > 0) {
+			if (!IsPassive()) {
 				tooltip.addPara(
-						"Consumes %s unit" + (volatilesConsumption == 1 ? "" : "s") + " of " + COMMODITY_ID + " per use.",
+						"This ability only needs to be used one time for any given system. Afterwards, this tooltip will provide an up-to-date summary while within that system.",
+						_padding);
+				tooltip.addPara(
+						"During activation, increases the range at which the fleet can be detected by %s* units and brings the fleet to a near-stop as drives are powered down to reduce interference.",
 						_padding,
 						Misc.getHighlightColor(),
-						volatilesConsumption + "");
+						Misc.getRoundedValueMaxOneAfterDecimal(DETECTABILITY_RANGE_BONUS));
+				int volatilesConsumption = GetCommodityCost();
+				if (volatilesConsumption > 0) {
+					tooltip.addPara(
+							"Consumes %s unit" + (volatilesConsumption == 1 ? "" : "s") + " of " + COMMODITY_ID + " per use.",
+							_padding,
+							Misc.getHighlightColor(),
+							volatilesConsumption + "");
+				}
+				tooltip.addPara("*2000 units = 1 map grid cell", gray, _padding);
+			} else {
+				tooltip.addPara(
+						"This ability functions automatically and does not need to be activated.",
+						_padding);
 			}
-			tooltip.addPara("*2000 units = 1 map grid cell", gray, _padding);
 			addIncompatibleToTooltip(tooltip, expanded);
 		}
 		if (!Global.CODEX_TOOLTIP_MODE) {
 			if (isInHyperspace) {
 				tooltip.addPara("Can not be used in hyperspace.", negative, _padding);
 			} else if (fleet.getStarSystem() == null) {
-				tooltip.addPara("Must be used in a star system.", negative, _padding);
+				tooltip.addPara("Must be used inside a star system.", negative, _padding);
 			}
 		}
 	}
@@ -289,13 +291,14 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 				break;
 			}
 		}
-		if (Global.getSettings().getModManager().isModEnabled("lunalib") && LunaSettings.getBoolean("ilysen_FullSpectrumSweep", "PassiveMode")) {
+		hasScannedCurSystem = loc.getMemoryWithoutUpdate().contains(FLAG_NAME);
+		if (IsPassive() && !hasScannedCurSystem) {
 			if (CheckCommodities()) {
-				RemoveCommodities();
+				//RemoveCommodities();
 				loc.getMemoryWithoutUpdate().set(FLAG_NAME, true);
+				hasScannedCurSystem = true;
 			}
 		}
-		hasScannedCurSystem = loc.getMemoryWithoutUpdate().contains(FLAG_NAME) || (Global.getSettings().getModManager().isModEnabled("lunalib") && LunaSettings.getBoolean("ilysen_FullSpectrumSweep", "PassiveMode"));
 		//log.info("Has scanned system:" + (hasScannedCurSystem ? "true" : "false"));
 		//log.info("System complete:" + (systemComplete ? "true" : "false"));
 		//log.info("Rescan complete.");
@@ -325,7 +328,8 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 
 	private boolean CheckCommodities() {
 		if (entity.getCargo().getCommodityQuantity(COMMODITY_ID) < GetCommodityCost() && !Global.getSettings().isDevMode()) {
-			entity.addFloatingText("Out of " + spec.getName().toLowerCase(), Misc.setAlpha(this.entity.getIndicatorColor(), 255), 0.5F);
+			entity.addFloatingText("Out of " + spec.getName().toLowerCase(),
+					Misc.setAlpha(this.entity.getIndicatorColor(), 255), 0.5F);
 			Global.getSoundPlayer().playUISound("ui_neutrino_detector_off", 1f, 1f);
 			return false;
 		}
@@ -336,5 +340,9 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 		if (Global.getSettings().isDevMode())
 			return;
 		entity.getCargo().removeCommodity(COMMODITY_ID, GetCommodityCost());
+	}
+
+	public boolean IsPassive() {
+		return Global.getSettings().getModManager().isModEnabled("lunalib") && LunaSettings.getBoolean("ilysen_FullSpectrumSweep", "PassiveMode");
 	}
 }
