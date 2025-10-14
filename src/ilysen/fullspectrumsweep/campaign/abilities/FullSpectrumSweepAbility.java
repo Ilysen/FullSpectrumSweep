@@ -275,7 +275,6 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 	{
 		//log.info("Rescanning: " + loc.getName());
 		isInHyperspace = loc.isHyperspace();
-		systemComplete = true; // Set this with a default of true...
 		if (loc.isHyperspace()) {
 			//log.info("Entered hyperspace. Ending logic here.");
 			_cachedEntities = null;
@@ -283,6 +282,7 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 			hasScannedCurSystem = false;
 			return;
 		}
+		systemComplete = true; // Set this with a default of true...
 		_cachedEntities = GetAllUndiscoveredEntities(loc);
 		for (Map.Entry<String, List<SectorEntityToken>> entry : _cachedEntities.entrySet()) {
 			//log.info(entry.getKey() + " contains " + entry.getValue().size() + " entries");
@@ -293,11 +293,11 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 		}
 		hasScannedCurSystem = loc.getMemoryWithoutUpdate().contains(FLAG_NAME);
 		if (IsPassive() && !hasScannedCurSystem) {
-			if (CheckCommodities()) {
+			//if (CheckCommodities()) {
 				//RemoveCommodities();
-				loc.getMemoryWithoutUpdate().set(FLAG_NAME, true);
-				hasScannedCurSystem = true;
-			}
+			loc.getMemoryWithoutUpdate().set(FLAG_NAME, true);
+			hasScannedCurSystem = true;
+			//}
 		}
 		//log.info("Has scanned system:" + (hasScannedCurSystem ? "true" : "false"));
 		//log.info("System complete:" + (systemComplete ? "true" : "false"));
