@@ -25,7 +25,7 @@ public class FullSpectrumSweepListener implements CurrentLocationChangedListener
 	public void reportCurrentLocationChanged(LocationAPI prev, LocationAPI curr) {
 		//log.info("Location changed: Moved from " + prev.getNameWithLowercaseType() + " to " + curr.getNameWithLowercaseType());
 		FullSpectrumSweepAbility ability = GetAbility();
-		ability.RescanSystem(curr);
+		ability.RescanSystem(curr, false);
 		if (ability.hasScannedCurSystem && !ability.systemComplete) {
 			boolean showReminder = true;
 			if (Global.getSettings().getModManager().isModEnabled("lunalib"))
@@ -42,7 +42,7 @@ public class FullSpectrumSweepListener implements CurrentLocationChangedListener
 		if (!entity.isInHyperspace() && Global.getSector().getPlayerFleet().getContainingLocation() == entityLoc) {
 			FullSpectrumSweepAbility ability = GetAbility();
 			boolean systemWasComplete = ability.systemComplete;
-			ability.RescanSystem(entityLoc);
+			ability.RescanSystem(entityLoc, true);
 			if (ability.systemComplete && !systemWasComplete && LunaSettings.getBoolean("ilysen_FullSpectrumSweep", "AlertOnComplete")) {
 				String title = FullSpectrumSweepAbility.FRONT_END_TEXT + ": All signatures discovered";
 

@@ -61,7 +61,7 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 		CampaignFleetAPI fleet = getFleet();
 		if (fleet == null)
 			return;
-		if (!CheckCommodities()) {
+		if (!CheckCommodities(false)) {
 			return;
 		}
 		super.pressButton();
@@ -97,7 +97,7 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 		fleet.getStats().getAccelerationMult().modifyMult(getModId(), 1f + (3f * level));
 		if (isPerformingScan && level >= 1f) {
 			fleet.getStarSystem().getMemoryWithoutUpdate().set(FLAG_NAME, true);
-			RescanSystem(fleet.getContainingLocation());
+			RescanSystem(fleet.getContainingLocation(), true);
 			GenerateMessage(fleet.getContainingLocation());
 			isPerformingScan = false;
 		}
@@ -271,7 +271,8 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 	// Runs and caches GetAllUndiscoveredEntities on the provided loc, and re-calculates conditionals (systemComplete, etc).
 	// We run this whenever the player changes location or discovers a new object.
 	// Theoretically this could just be determined every frame, but it's way cleaner to only rerun it when necessary.
-	public void RescanSystem(LocationAPI loc)
+	// `silent` is for passive mode, and will prevent the "Out of volatiles" message from being shown if none are available.
+	public void RescanSystem(LocationAPI loc, boolean silent)
 	{
 		//log.info("Rescanning: " + loc.getName());
 		isInHyperspace = loc.isHyperspace();
@@ -293,11 +294,11 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 		}
 		hasScannedCurSystem = loc.getMemoryWithoutUpdate().contains(FLAG_NAME);
 		if (IsPassive() && !hasScannedCurSystem) {
-			//if (CheckCommodities()) {
-				//RemoveCommodities();
-			loc.getMemoryWithoutUpdate().set(FLAG_NAME, true);
-			hasScannedCurSystem = true;
-			//}
+			if (CheckCommodities(silent)) {
+				RemoveCommodities();
+				loc.getMemoryWithoutUpdate().set(FLAG_NAME, true);
+				hasScannedCurSystem = true;
+			}
 		}
 		//log.info("Has scanned system:" + (hasScannedCurSystem ? "true" : "false"));
 		//log.info("System complete:" + (systemComplete ? "true" : "false"));
@@ -326,11 +327,13 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 		return COMMODITY_PER_USE;
 	}
 
-	private boolean CheckCommodities() {
+	private boolean CheckCommodities(boolean silent) {
 		if (entity.getCargo().getCommodityQuantity(COMMODITY_ID) < GetCommodityCost() && !Global.getSettings().isDevMode()) {
-			entity.addFloatingText("Out of " + spec.getName().toLowerCase(),
-					Misc.setAlpha(this.entity.getIndicatorColor(), 255), 0.5F);
-			Global.getSoundPlayer().playUISound("ui_neutrino_detector_off", 1f, 1f);
+			if (!silent) {
+				entity.addFloatingText("Out of " + spec.getName().toLowerCase(),
+						Misc.setAlpha(this.entity.getIndicatorColor(), 255), 0.5F);
+				Global.getSoundPlayer().playUISound("ui_neutrino_detector_off", 1f, 1f);
+			}
 			return false;
 		}
 		return true;
