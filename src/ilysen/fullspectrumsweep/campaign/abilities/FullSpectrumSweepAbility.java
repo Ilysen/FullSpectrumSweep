@@ -25,21 +25,35 @@ import lunalib.lunaSettings.LunaSettings;
 import org.apache.log4j.Logger;
 
 public class FullSpectrumSweepAbility extends BaseDurationAbility {
+	// Used in GenerateMessage to represent the ability, i.e. "Full-spectrum sweep: 3 signatures detected"
 	public static final String FRONT_END_TEXT = "Full-spectrum sweep";
+	// Used in a system's memory to determine if we've scanned it before
 	public static final String FLAG_NAME = "$ilysen_FullSpectrumSweep_UsedFssInSystem";
+	// How much the fleet's detection range increases when activating the sweep
 	public static final float DETECTABILITY_RANGE_BONUS = 5000f;
+	// Commodity required and consumed
 	public static final String COMMODITY_ID = "volatiles";
+	// Default amount consumed. Actual amount is overridden by settings.
 	public static final int COMMODITY_PER_USE = 1;
 
-	protected boolean isPerformingScan = false;
+	// Has this system been scanned before?
 	public boolean hasScannedCurSystem = false;
+	// Have we discovered every detectable object in this system?
 	public boolean systemComplete = false;
-	protected boolean isInHyperspace = false;
 
+	// If a scan is in progress -- prevents mashing the ability
+	private boolean _isPerformingScan = false;
+	// Cached reference to if the player fleet is in hyperspace. Micro-optimization, assigned on rescan
+	private boolean _isInHyperspace = false;
+	// Map containing lists of scannable entities in this system, associated to the appropriate tags used to categorized them.
+	// Refreshed on rescan. This saves us from having to repopulate the lists every frame when hovering over the tooltip.
 	private Map<String, List<SectorEntityToken>> _cachedEntities;
+
 	private static final Logger log = Global.getLogger(FullSpectrumSweepAbility.class);
-	private int _spookyTextTicks = 0;
-	private String _spookyText;
+
+	// Both of these values are used solely for the easter egg in abyssal hyperspace.
+	private int _abyssTextTicksLeft = 0;
+	private String _abyssText;
 
 	@Override
 	public String getSpriteName() {
@@ -54,6 +68,7 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 		return super.getSpriteName();
 	}
 
+	//region Main logic
 	@Override
 	public void pressButton() {
 		if (!isUsable() || turnedOn)
@@ -82,7 +97,7 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 				custom.setSounds(Arrays.asList("default_campaign_ping", "default_campaign_ping", "default_campaign_ping"));
 				Global.getSector().addPing(entity, custom);
 			}
-			isPerformingScan = true;
+			_isPerformingScan = true;
 			RemoveCommodities();
 		}
 	}
@@ -95,11 +110,11 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 		fleet.getStats().getFleetwideMaxBurnMod().modifyMult(getModId(), 0f, FRONT_END_TEXT);
 		fleet.getStats().getDetectedRangeMod().modifyFlat(getModId(), DETECTABILITY_RANGE_BONUS * level, FRONT_END_TEXT);
 		fleet.getStats().getAccelerationMult().modifyMult(getModId(), 1f + (3f * level));
-		if (isPerformingScan && level >= 1f) {
+		if (_isPerformingScan && level >= 1f) {
 			fleet.getStarSystem().getMemoryWithoutUpdate().set(FLAG_NAME, true);
 			RescanSystem(fleet.getContainingLocation(), true);
-			GenerateMessage(fleet.getContainingLocation());
-			isPerformingScan = false;
+			GenerateReminderMessage();
+			_isPerformingScan = false;
 		}
 	}
 
@@ -129,7 +144,7 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 		if (!super.isUsable())
 			return false;
 		CampaignFleetAPI fleet = getFleet();
-		if (fleet == null || isInHyperspace || fleet.isInHyperspaceTransition())
+		if (fleet == null || _isInHyperspace || fleet.isInHyperspaceTransition())
 			return false;
 		StarSystemAPI system = fleet.getStarSystem();
 		return system != null && !hasScannedCurSystem;
@@ -147,33 +162,35 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 
 		if (!Global.CODEX_TOOLTIP_MODE) {
 			tooltip.addTitle(spec.getName());
-			if (Misc.isInAbyss(getFleet())) { // Special handling in abyssal hyperspace; glitchy text and blank icon
+			// Special handling in abyssal hyperspace; glitchy text and blank icon
+			// Feature creep? Never heard of it
+			if (Misc.isInAbyss(getFleet())) {
 				StringBuilder spooky = new StringBuilder();
-				if (_spookyTextTicks > 0) {
-					_spookyTextTicks--;
-					if (_spookyText.isBlank()) {
+				if (_abyssTextTicksLeft > 0) {
+					_abyssTextTicksLeft--;
+					if (_abyssText.isBlank()) {
 						switch (Misc.random.nextInt(4)) {
 							case 1:
-								_spookyText = "WARN: drive bubble pressure exceeds safe tolerance by (10^2 * 3.6821); recommend sensor shutdown";
+								_abyssText = "WARN: drive bubble pressure exceeds safe tolerance by (10^2 * 3.6821); recommend sensor shutdown";
 								break;
 							case 2:
-								_spookyText = "WARN: nav error overflow, unable to determine position (last location ...)";
+								_abyssText = "WARN: nav error overflow, unable to determine position (last location ...)";
 								break;
 							case 3:
-								_spookyText = "WARN: invalid sensor input, unsupported data type (x" + Misc.random.nextInt(1111, 99999) + ")";
+								_abyssText = "WARN: invalid sensor input, unsupported data type (x" + Misc.random.nextInt(1111, 99999) + ")";
 								break;
 							default:
-								_spookyText = "WARN: interface request refused due to uncertified source";
+								_abyssText = "WARN: interface request refused due to uncertified source";
 								break;
 						}
 					}
-					tooltip.addPara("%s", _padding, negative, _spookyText);
+					tooltip.addPara("%s", _padding, negative, _abyssText);
 				} else {
 					spooky.append("?".repeat(Math.max(0, Misc.random.nextInt(4, 45))));
 					tooltip.addPara(spooky.toString(), _padding);
 					if (Misc.random.nextInt(200) == 1) {
-						_spookyTextTicks = Misc.random.nextInt(10, 40);
-						_spookyText = "";
+						_abyssTextTicksLeft = Misc.random.nextInt(10, 40);
+						_abyssText = "";
 					}
 				}
 				return;
@@ -184,9 +201,12 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 
 		if (!Global.CODEX_TOOLTIP_MODE && hasScannedCurSystem) {
 			if (systemComplete) {
-				tooltip.addPara("%s", _padding, Misc.getPositiveHighlightColor(), "All detectable objects in this system have been discovered.");
-				tooltip.addPara("%s", _padding, gray, "This does not track if objects have been investigated, only if they have been seen at least once.");
-				tooltip.addPara("%s", _padding, gray, "Fleets, cargo pods, and unstable debris do not appear here and may still be undiscovered.");
+				tooltip.addPara("%s", _padding, Misc.getPositiveHighlightColor(),
+						"All detectable objects in this system have been discovered.");
+				tooltip.addPara("%s", _padding, gray,
+						"This does not track if objects have been investigated, only if they have been seen at least once.");
+				tooltip.addPara("%s", _padding, gray,
+						"Fleets, cargo pods, and unstable debris do not appear here and may still be undiscovered.");
 				return;
 			} else {
 				tooltip.addPara("Undiscovered objects in this system:", _padding);
@@ -209,17 +229,24 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 			}
 		} else {
 			tooltip.addPara(
-					"Calibrates the fleet's active sensor network to search for garbage noise, abnormal emissions, and other telltale signs of human-made artifacts. This detects the number of foreign objects present in a given star system, but does not discern their specific nature or their exact locations.",
+					"Calibrates the fleet's active sensor network to search for garbage noise, abnormal emissions, " +
+							"and other telltale signs of human-made artifacts. This detects the number of foreign " +
+							"objects present in a given star system, but does not discern their specific nature or " +
+							"their exact locations.",
 					_padding);
 			tooltip.addPara(
-					"Objects that have already been discovered are excluded from the sweep. Additionally, some phenomena - including cargo pods, unstable debris, and any fleets other than your own - cannot be detected at all.",
+					"Objects that have already been discovered are excluded from the sweep. " +
+							"Additionally, some phenomena - including cargo pods, unstable debris, and " +
+							"any fleets other than your own - cannot be detected at all.",
 					_padding);
 			if (!IsPassive()) {
 				tooltip.addPara(
-						"This ability only needs to be used one time for any given system. Afterwards, this tooltip will provide an up-to-date summary while within that system.",
+						"This ability only needs to be used one time for any given system. " +
+								"Afterwards, this tooltip will provide an up-to-date summary while within that system.",
 						_padding);
 				tooltip.addPara(
-						"During activation, increases the range at which the fleet can be detected by %s* units and brings the fleet to a near-stop as drives are powered down to reduce interference.",
+						"During activation, increases the range at which the fleet can be detected by %s* units " +
+								"and brings the fleet to a near-stop as drives are powered down to reduce interference.",
 						_padding,
 						Misc.getHighlightColor(),
 						Misc.getRoundedValueMaxOneAfterDecimal(DETECTABILITY_RANGE_BONUS));
@@ -240,7 +267,7 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 			addIncompatibleToTooltip(tooltip, expanded);
 		}
 		if (!Global.CODEX_TOOLTIP_MODE) {
-			if (isInHyperspace) {
+			if (_isInHyperspace) {
 				tooltip.addPara("Can not be used in hyperspace.", negative, _padding);
 			} else if (fleet.getStarSystem() == null) {
 				tooltip.addPara("Must be used inside a star system.", negative, _padding);
@@ -275,7 +302,7 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 	public void RescanSystem(LocationAPI loc, boolean silent)
 	{
 		//log.info("Rescanning: " + loc.getName());
-		isInHyperspace = loc.isHyperspace();
+		_isInHyperspace = loc.isHyperspace();
 		if (loc.isHyperspace()) {
 			//log.info("Entered hyperspace. Ending logic here.");
 			_cachedEntities = null;
@@ -305,7 +332,8 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 		//log.info("Rescan complete.");
 	}
 
-	public void GenerateMessage(LocationAPI loc)
+	// Outputs a campaign message showing how many entities in this system have been detected, but not discovered.
+	public void GenerateReminderMessage()
 	{
 		int totalSize = 0;
 		for (List<SectorEntityToken> subset : _cachedEntities.values()) {
@@ -313,15 +341,23 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 		}
 		String objectText = totalSize + " signature" + (totalSize == 1 ? "" : "s") + " detected";
 		String title = FRONT_END_TEXT + ": " + objectText;
-		
+
 		MessageIntel intel = new MessageIntel(title, Misc.getBasePlayerColor(), new String[] { totalSize + "" }, Misc.getHighlightColor());
 		intel.setIcon(getSpriteName());
 		intel.setSound("ui_discovered_entity");
-		
+
 		Global.getSector().getCampaignUI().addMessage(intel);
 	}
+	//endregion
 
-	private int GetCommodityCost() {
+	//region Helpers
+	public Boolean IsPassive() {
+		if (Global.getSettings().getModManager().isModEnabled("lunalib"))
+			return LunaSettings.getBoolean("ilysen_FullSpectrumSweep", "PassiveMode");
+		return false;
+	}
+
+	private Integer GetCommodityCost() {
 		if (Global.getSettings().getModManager().isModEnabled("lunalib"))
 			return LunaSettings.getInt("ilysen_FullSpectrumSweep", "VolatilesCost");
 		return COMMODITY_PER_USE;
@@ -344,8 +380,5 @@ public class FullSpectrumSweepAbility extends BaseDurationAbility {
 			return;
 		entity.getCargo().removeCommodity(COMMODITY_ID, GetCommodityCost());
 	}
-
-	public boolean IsPassive() {
-		return Global.getSettings().getModManager().isModEnabled("lunalib") && LunaSettings.getBoolean("ilysen_FullSpectrumSweep", "PassiveMode");
-	}
+	//endregion
 }

@@ -29,9 +29,9 @@ public class FullSpectrumSweepListener implements CurrentLocationChangedListener
 		if (ability.hasScannedCurSystem && !ability.systemComplete) {
 			boolean showReminder = true;
 			if (Global.getSettings().getModManager().isModEnabled("lunalib"))
-				showReminder = LunaSettings.getBoolean("ilysen_FullSpectrumSweep", "EnableReminderPings");
+				showReminder = Boolean.TRUE.equals(LunaSettings.getBoolean("ilysen_FullSpectrumSweep", "EnableReminderPings"));
 			if (showReminder)
-				ability.GenerateMessage(curr);
+				ability.GenerateReminderMessage();
 		}
 	}
 
@@ -43,7 +43,10 @@ public class FullSpectrumSweepListener implements CurrentLocationChangedListener
 			FullSpectrumSweepAbility ability = GetAbility();
 			boolean systemWasComplete = ability.systemComplete;
 			ability.RescanSystem(entityLoc, true);
-			if (ability.systemComplete && !systemWasComplete && LunaSettings.getBoolean("ilysen_FullSpectrumSweep", "AlertOnComplete")) {
+			if (ability.systemComplete && !systemWasComplete &&
+					Boolean.TRUE.equals(LunaSettings.getBoolean("ilysen_FullSpectrumSweep", "AlertOnComplete"))) {
+				// This could be generalized from GenerateReminderMessage instead of copy-pasted,
+				// but honestly it's absolutely a non-issue and I can't really spare the energy to worry about it
 				String title = FullSpectrumSweepAbility.FRONT_END_TEXT + ": All signatures discovered";
 
 				MessageIntel intel = new MessageIntel(title, Misc.getBasePlayerColor());
@@ -54,6 +57,8 @@ public class FullSpectrumSweepListener implements CurrentLocationChangedListener
 		}
 	}
 
+	// I might be able to use a singleton for this?
+	// Don't want to push my luck though
 	private FullSpectrumSweepAbility GetAbility() {
 		return (FullSpectrumSweepAbility) Global.getSector().getPlayerFleet().getAbility("ilysen_FullSpectrumSweep_FSSAbility");
 	}

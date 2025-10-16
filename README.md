@@ -32,3 +32,14 @@ If [LunaLib](https://fractalsoftworks.com/forum/index.php?topic=25658) is instal
 *In a scanned system, with all objects discovered:*<br/>
 ![The tooltip of the Full-Spectrum Sweep ability in a system that's been scanned and fully explored. The ability's icon has turned green to represent that everything in the system has been discovered.](docs/fss_complete.png)
 </details>
+
+## Changelog
+
+### TBD
+#### Version 0.1.1
+* Passive mode now consumes volatiles upon scanning a new system. The exact amount can be configured (or disabled) as normal.
+* Added a new setting that displays a message when all signatures in a system have been discovered. Defaults to false.
+
+### 5 October, 2025
+#### Version 0.1
+* Initial release. Keeping this here instead of registering on the forum or something because I don't want to worry about all that /o/
