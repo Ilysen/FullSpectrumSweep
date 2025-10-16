@@ -42,7 +42,7 @@ Usage notes:
 ### TBD
 #### Version 0.1.1
 * Passive mode now consumes volatiles upon scanning a new system. The exact amount can be configured (or disabled) as normal.
-* Added a new setting that displays a message when all signatures in a system have been discovered. Defaults to false.
+* A message is now displayed upon discovering all detected entities in a system that's been scanned, saving you from having to constantly watch the icon/tooltip. Can be freely toggled off if you have LunaLib installed.
 
 ### 5 October, 2025
 #### Version 0.1
